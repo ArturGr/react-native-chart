@@ -27,8 +27,7 @@ _this.props.data.onDataPointPress(e,dataPoint,index);}};_this.
 
 _drawBar=function(_dataPoint,index){var _dataPoint2=_slicedToArray(
 _dataPoint,2);var _x=_dataPoint2[0];var dataPoint=_dataPoint2[1];
-var backgroundColor=_this.props.color[0]||C.BLUE;
-// the index [0] is facilitate multi-line, fix later if need be
+var backgroundColor=_this.props.color||C.BLUE;
 var HEIGHT=_this.props.height;
 var WIDTH=_this.props.width;
 var widthPercent=_this.props.widthPercent||0.5;
@@ -53,7 +52,7 @@ if(height<=0)height=20;
 return (
 _react2.default.createElement(_reactNative.TouchableWithoutFeedback,{
 key:index,
-onPress:function onPress(e){return _this._handlePress(e,dataPoint,index);},__source:{fileName:_jsxFileName,lineNumber:54}},
+onPress:function onPress(e){return _this._handlePress(e,dataPoint,index);},__source:{fileName:_jsxFileName,lineNumber:53}},
 
 _react2.default.createElement(_reactNative.View,{
 style:{
@@ -61,7 +60,7 @@ borderTopLeftRadius:_this.props.cornerRadius||0,
 borderTopRightRadius:_this.props.cornerRadius||0,
 backgroundColor:backgroundColor,
 width:width,
-height:height},__source:{fileName:_jsxFileName,lineNumber:58}})));};_this.state={};return _this;}_createClass(BarChart,[{key:'render',value:function render()
+height:height},__source:{fileName:_jsxFileName,lineNumber:57}})));};_this.state={};return _this;}_createClass(BarChart,[{key:'render',value:function render()
 
 
 
@@ -71,6 +70,6 @@ height:height},__source:{fileName:_jsxFileName,lineNumber:58}})));};_this.state=
 {
 var data=this.props.data||[];
 return (
-_react2.default.createElement(_reactNative.View,{ref:'container',style:[styles.default],__source:{fileName:_jsxFileName,lineNumber:74}},
-_react2.default.createElement(_Grid2.default,_extends({},this.props,{__source:{fileName:_jsxFileName,lineNumber:75}})),
+_react2.default.createElement(_reactNative.View,{ref:'container',style:[styles.default],__source:{fileName:_jsxFileName,lineNumber:73}},
+_react2.default.createElement(_Grid2.default,_extends({},this.props,{__source:{fileName:_jsxFileName,lineNumber:74}})),
 data.map(this._drawBar)));}}]);return BarChart;}(_react.Component);exports.default=BarChart;
