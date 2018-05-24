@@ -1,32 +1,60 @@
+
 /* @flow */
 import React, { Component } from 'react';
-import { Animated, ART, View, Platform, TouchableOpacity } from 'react-native';
+import { Animated, ART, View, Platform, TouchableOpacity, Text } from 'react-native';
 const { Surface, Shape, Path } = ART;
 import * as C from './constants';
 import Circle from './Circle';
 const AnimatedShape = Animated.createAnimatedComponent(Shape);
 import Grid from './Grid';
 import { uniqueValuesInDataSets } from './util';
+import ViewOverflow from 'react-native-view-overflow';
 
-const makeDataPoint = (x : number, y : number, data : any, index : number) => {
+export class MyText extends Component<void, any, any> {
+	constructor(props) {
+		super(props);
+		this.state = {
+			text: props.text || "",
+		};
+	}
+	render() {
+		return (
+			<Text style={{
+				zIndex: 999999999, marginHorizontal: 6, fontFamily: 'CircularStd-Book',
+				fontSize: 11,
+				color: '#fff',
+				letterSpacing: -0.2,
+				lineHeight: 16,
+			}}>{this.state.text}</Text>
+		)
+	}
+
+	setText(text) {
+		this.setState({ text: text });
+	}
+
+}
+
+const makeDataPoint = (x: number, y: number, data: any, index: number) => {
 
 	let color = (data.color[index]) ? data.color[index] : C.BLUE;
 
 	let fill = ((data.dataPointFillColor) && (data.dataPointFillColor[index])) ?
-		(data.dataPointFillColor[index]) :  color;
+		(data.dataPointFillColor[index]) : color;
 
 	let stroke = ((data.dataPointColor) && (data.dataPointColor[index])) ?
-			(data.dataPointColor[index]) :  color;
+		(data.dataPointColor[index]) : color;
 
 	return {
 		x,
 		y,
 		radius: data.dataPointRadius,
 		fill: fill,
-		stroke: stroke  };
+		stroke: stroke
+	};
 };
 
-const calculateDivisor = (minBound : number, maxBound : number) : number => {
+const calculateDivisor = (minBound: number, maxBound: number): number => {
 	return (maxBound - minBound <= 0) ? 0.00001 : maxBound - minBound;
 };
 
@@ -34,7 +62,9 @@ const heightZero = (Platform.OS === 'ios') ? 0 : 1;
 
 export default class LineChart extends Component<void, any, any> {
 
-	constructor(props : any) {
+	myText;
+
+	constructor(props: any) {
 		super(props);
 		const heightValue = (props.animated) ? heightZero : props.height;
 		const opacityValue = (props.animated) ? 0 : 1;
@@ -129,9 +159,9 @@ export default class LineChart extends Component<void, any, any> {
 			fillPath.push(fillPathArray);
 		}
 
-		var multipleLines = dataPoints.map( (dataPointSet, index) => {
+		var multipleLines = dataPoints.map((dataPointSet, index) => {
 			let color = (this.props.color[index]) ? this.props.color[index] : C.BLUE;
-			let allDisjointPaths = path[index].map( (singlePath) => {
+			let allDisjointPaths = path[index].map((singlePath) => {
 				return (
 					<AnimatedShape d={singlePath} stroke={this.props.color[index] || C.BLUE} strokeWidth={this.props.lineWidth} />
 				);
@@ -139,8 +169,8 @@ export default class LineChart extends Component<void, any, any> {
 			return allDisjointPaths;
 		});
 
-		var multipleFills = dataPoints.map( (dataPointSet, index) => {
-			let allDisjointPaths = fillPath[index].map ( (singlePath, subIndex) => {
+		var multipleFills = dataPoints.map((dataPointSet, index) => {
+			let allDisjointPaths = fillPath[index].map((singlePath, subIndex) => {
 				return (
 					<AnimatedShape d={singlePath} fill={this.props.fillColor} />
 				);
@@ -149,11 +179,11 @@ export default class LineChart extends Component<void, any, any> {
 		});
 
 		return (
-			<View>
+			<ViewOverflow style={{ overflow: 'visible' }} >
 				<View style={{ position: 'absolute' }}>
 					<Surface width={containerWidth} height={containerHeight}>
-						{ multipleLines }
-						{ multipleFills }
+						{multipleLines}
+						{multipleFills}
 					</Surface>
 				</View>
 				<View style={{ position: 'absolute' }}>
@@ -161,27 +191,107 @@ export default class LineChart extends Component<void, any, any> {
 				</View>
 				{(() => {
 					if (!this.props.showDataPoint) return null;
-
-					var multipleDataPoints = dataPoints.map( (dataPointSet, index) => {
-						let totalDataSet = dataPointSet.map((d, i) => {
-							return (
-								<Circle key={i} {...d} onPress={()=>alert(i)} />
-							);
-						});
- 						return totalDataSet;
+					let point = dataPoints[0][Math.min(3, dataPoints[0].length)];
+					let animatedX = new Animated.Value(-200);
+					let animatedY = new Animated.Value(0);
+					let label = "";
+					if (point) {
+						label = Math.round((maxBound * (1 - (point.y / containerHeight))) + minBound).toString();
+						animatedX = new Animated.Value(point.x - 8);
+						animatedY = new Animated.Value(point.y - 8);
+					}
+					let interpolatedY = animatedY.interpolate({
+						inputRange: [0, containerHeight],
+						outputRange: [0 - 30, containerHeight - 30],
 					});
-
+					let interpolatedX = animatedX.interpolate({
+						inputRange: [0, containerWidth],
+						outputRange: [0 - 42, containerWidth - 42],
+					});
 					return (
-						<Surface width={containerWidth} height={containerHeight}>
-							{ multipleDataPoints }
-						</Surface>
+						<ViewOverflow style={{ width: containerWidth, height: containerHeight, backgroundColor: "transparent", overflow: 'visible' }}
+							onStartShouldSetResponder={() => true}
+							onMoveShouldSetResponder={() => true}
+							onResponderGrant={() => {
+								this.props.onTouchStart && this.props.onTouchStart();
+							}}
+							onResponderRelease={() => {
+								this.props.onTouchEnd && this.props.onTouchEnd();
+							}}
+							onResponderMove={e => {
+								if (dataPoints[0].length > 0) {
+									let tX = e.nativeEvent.pageX - 30
+									let previus = Math.floor(tX / horizontalStep);
+									let next = Math.ceil(tX / horizontalStep);
+									let xRest = (tX / horizontalStep) - previus;
+									let yPoint;
+									let xPoint;
+									let label;
+									if (dataPoints[0][next]) {
+										if (dataPoints[0].length < 2) {
+											yPoint = dataPoints[0][dataPoints[0].length - 1].y
+											xPoint = dataPoints[0][dataPoints[0].length - 1].x
+										} else if (!dataPoints[0][previus]) {
+											previus = 0;
+											next = 1;
+										}
+										let yDiff = dataPoints[0][previus].y - dataPoints[0][next].y
+										let xDiff = dataPoints[0][previus].x - dataPoints[0][next].x
+										yPoint = xRest == 0 ? dataPoints[0][previus].y : (dataPoints[0][previus].y - (yDiff * xRest))
+										xPoint = xRest == 0 ? dataPoints[0][previus].x : (dataPoints[0][previus].x - (xDiff * xRest))
+									} else {
+										if (previus < 0) {
+											yPoint = dataPoints[0][0].y
+											xPoint = dataPoints[0][0].x
+										} else {
+											yPoint = dataPoints[0][dataPoints[0].length - 1].y
+											xPoint = dataPoints[0][dataPoints[0].length - 1].x
+										}
+									}
+									let text = Math.round((maxBound * (1 - (yPoint / containerHeight))) + minBound).toString();
+									this.myText && this.myText.setText(text)
+									Animated.parallel([
+										Animated.timing(animatedX, {
+											duration: 0,
+											toValue: xPoint - 8,
+										}),
+										Animated.timing(animatedY, {
+											duration: 0,
+											toValue: yPoint - 8,
+										})
+									]).start();
+								}
+							}} >
+							<Animated.View style={{ position: 'absolute', backgroundColor: 'transparent', alignItems: 'center', width: 100, height: 80, left: interpolatedX, top: interpolatedY, flexDirection: 'row' }} >
+								<View style={{ flex: 1, alignItems: 'center', }} >
+									<View style={{ backgroundColor: 'rgba(77, 77, 77, 1)', alignItems: 'center', justifyContent: 'center', borderRadius: 2 }} >
+										<MyText ref={(view) => { this.myText = view }} text={label} />
+									</View>
+									<View style={{ flex: 1, alignItems: 'center' }} >
+										<View style={{
+											width: 6,
+											height: 0,
+											borderTopColor: 'rgba(77, 77, 77, 1)',
+											backgroundColor: 'transparent',
+											borderStyle: 'solid',
+											borderLeftWidth: 3,
+											borderRightWidth: 3,
+											borderTopWidth: 6,
+											borderLeftColor: 'transparent',
+											borderRightColor: 'transparent',
+										}} />
+									</View>
+								</View>
+							</Animated.View>
+							<Animated.View style={{ width: 16, height: 16, borderRadius: 8, borderWidth: 3, borderColor: 'rgba(207, 180, 110, 1)', backgroundColor: '#fff', left: animatedX, top: animatedY }} />
+						</ViewOverflow>
 					);
 				})()}
-			</View>
+			</ViewOverflow>
 		);
 	};
 
-	render() : any {
+	render(): any {
 		if (Platform.OS === 'ios') {
 			return (
 				<View style={{ overflow: 'hidden' }}>
