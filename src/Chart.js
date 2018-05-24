@@ -9,6 +9,7 @@ import PieChart from './PieChart';
 import YAxis from './yAxis';
 import XAxis from './xAxis';
 import * as C from './constants';
+import ViewOverflow from 'react-native-view-overflow';
 
 const styles = StyleSheet.create({
 	default: {},
@@ -27,7 +28,7 @@ const getRoundNumber = (value, gridStep) => {
 
 
 export default class Chart extends Component<void, any, any> {
-	static defaultProps : any = {
+	static defaultProps: any = {
 		data: [[]],
 		animated: true,
 		animationDuration: 300,
@@ -59,7 +60,7 @@ export default class Chart extends Component<void, any, any> {
 		yAxisShortLabel: false,
 	};
 
-	constructor(props : any) {
+	constructor(props: any) {
 		super(props);
 		this.state = { bounds: { min: 0, max: 0 } };
 	}
@@ -71,13 +72,13 @@ export default class Chart extends Component<void, any, any> {
 		return props !== this.props || state !== this.state;
 	}
 
-	componentDidUpdate(props : any) {
+	componentDidUpdate(props: any) {
 		if (this.props !== props) {
 			this._computeBounds();
 		}
 	}
 
-	_computeBounds() : any {
+	_computeBounds(): any {
 		let min = Infinity;
 		let max = -Infinity;
 		const data = this.props.data || [[]];
@@ -145,19 +146,19 @@ export default class Chart extends Component<void, any, any> {
 			}
 		}
 		return this.setState({ bounds: { max, min } });
-	}
+	} 
 
-	_onContainerLayout = (e : Object) => this.setState({
+	_onContainerLayout = (e: Object) => this.setState({
 		containerHeight: e.nativeEvent.layout.height,
 		containerWidth: e.nativeEvent.layout.width,
-	});
+	});   
 
-	_minVerticalBound() : number {
+	_minVerticalBound(): number {
 		if (this.props.tightBounds) return this.state.bounds.min;
 		return (this.state.bounds.min > 0) ? this.state.bounds.min : 0;
 	}
 
-	_maxVerticalBound() : number {
+	_maxVerticalBound(): number {
 		if (this.props.tightBounds) return this.state.bounds.max;
 		return (this.state.bounds.max > 0) ? this.state.bounds.max : 0;
 	}
@@ -166,17 +167,17 @@ export default class Chart extends Component<void, any, any> {
 		const components = { 'line': LineChart, 'bar': BarChart, 'pie': PieChart };
 		const axisAlign = (this.props.type === 'line') ? 'left' : 'center';
 		return (
-			<View>
+			<ViewOverflow style={{ overflow: 'visible' }}>
 				{(() => {
 					const ChartType = components[this.props.type] || BarChart;
 					if (this.props.showAxis && Chart !== PieChart) {
 						return (
-							<View
+							<ViewOverflow
 								ref="container"
-								style={[this.props.style || {}, { flex: 1, flexDirection: 'column' }]}
+								style={[this.props.style || {}, { flex: 1, flexDirection: 'column' }, { overflow: 'visible' }]}
 								onLayout={this._onContainerLayout}
 							>
-								<View style={[styles.default, { flexDirection: 'row' }]}>
+								<ViewOverflow style={[styles.default, { flexDirection: 'row', overflow: 'visible' }]}>
 									<View ref="yAxis">
 										<YAxis
 											{...this.props}
@@ -199,7 +200,7 @@ export default class Chart extends Component<void, any, any> {
 										minVerticalBound={this.state.bounds.min}
 										maxVerticalBound={this.state.bounds.max}
 									/>
-								</View>
+								</ViewOverflow>
 								{(() => {
 									return (
 										<View ref="xAxis">
@@ -214,14 +215,14 @@ export default class Chart extends Component<void, any, any> {
 										</View>
 									);
 								})()}
-							</View>
+							</ViewOverflow>
 						);
 					}
 					return (
 						<View
 							ref="container"
 							onLayout={this._onContainerLayout}
-							style={[this.props.style || {}, styles.default]}
+							style={[this.props.style || {}, styles.default, { overflow: 'visible', paddingTop: 50 }]}
 						>
 							<ChartType
 								{...this.props}
@@ -234,7 +235,7 @@ export default class Chart extends Component<void, any, any> {
 						</View>
 					);
 				})()}
-			</View>
+			</ViewOverflow>
 		);
 	}
 }
