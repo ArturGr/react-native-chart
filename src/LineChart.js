@@ -222,7 +222,25 @@ export default class LineChart extends Component<void, any, any> {
 							onResponderGrant={() => {
 								this.props.onTouchStart && this.props.onTouchStart();
 							}}
+							onMoveShouldSetResponderCapture={() => true}
+							onMoveShouldSetPanResponderCapturer={() => true}
+							onStartShouldSetPanResponderCapture={() => true}
+							onPanResponderStart={() => {
+								this.props.onTouchStart && this.props.onTouchStart();
+							}}
 							onResponderRelease={() => {
+								this.props.onTouchEnd && this.props.onTouchEnd();
+							}}
+							onPanResponderEnd={() => {
+								this.props.onTouchEnd && this.props.onTouchEnd();
+							}}
+							onPanResponderReject={() => {
+								this.props.onTouchEnd && this.props.onTouchEnd();
+							}}
+							onPanResponderTerminate={() => {
+								this.props.onTouchEnd && this.props.onTouchEnd();
+							}}
+							onPanResponderTerminationRequest={() => {
 								this.props.onTouchEnd && this.props.onTouchEnd();
 							}}
 							onResponderMove={e => {
