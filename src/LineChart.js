@@ -100,7 +100,6 @@ export default class LineChart extends Component<void, any, any> {
 		const data = this.props.data || [[]];
 		let minBound = this.props.minVerticalBound;
 		let maxBound = this.props.maxVerticalBound;
-		//console.info("Min BOUN = ", minBound, "     max bound = ", maxBound);
 
 		// For all same values, create a range anyway
 		if (minBound === maxBound) {
@@ -135,11 +134,12 @@ export default class LineChart extends Component<void, any, any> {
 					return;
 				}
 
-				let _height = (Math.max(0, minBound) * scale) + (containerHeight - (dataPoint * scale));
+				let _height = ( minBound * scale) + (containerHeight - (dataPoint * scale));
 				if (_height < 0) _height = 0;
 
 				const x = horizontalStep * (i);
 				const y = Math.round(_height);
+
 				let seti = makeDataPoint(x, y, this.props, index);
 				dataPointSet.push(seti);
 
@@ -195,13 +195,12 @@ export default class LineChart extends Component<void, any, any> {
 			return Math.round(yPointText);
 		}
 
-		//console.info("dataPointSet = ", dataPointSet);
 		return (
 			<ViewOverflow style={{ overflow: 'visible' }} >
-				<View style={{ position: 'absolute' }}> 
+				<View style={{ position: 'absolute' }}>
 					<Surface width={containerWidth} height={containerHeight}>
 						{multipleLines}
-						{multipleFills} 
+						{multipleFills}
 					</Surface>
 				</View>
 				<View style={{ position: 'absolute' }}>
