@@ -204,7 +204,7 @@ export default class LineChart extends Component<void, any, any> {
 					let label = "";
 					if (point) {
 						label = getYForPoints(data[0][Math.min(2, data[0].length)], data[0][Math.min(2, data[0].length)], 0);
-						//label = Math.round((maxBound * (1 - (point.y / (containerHeight + 12)))) + 0).toString();
+						this.myText && this.myText.setText(label);
 						animatedX = new Animated.Value(point.x - 8);
 						animatedY = new Animated.Value(point.y - 8);
 					}
