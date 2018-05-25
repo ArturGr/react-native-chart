@@ -27,7 +27,7 @@ export default class Grid extends Component {
 		const verticalRange = [];
 		const xData = uniqueValuesInDataSets(this.props.data || [[]], 0);
 		const yData = uniqueValuesInDataSets(this.props.data || [[]], 1);
-		const horizontalSteps = (yData.length < this.props.verticalGridStep) ? yData.length : this.props.verticalGridStep;
+		const horizontalSteps = this.props.verticalGridStep + 1;//(yData.length < this.props.verticalGridStep) ? yData.length : this.props.verticalGridStep;
 		let stepsBetweenVerticalLines = this.props.horizontalGridStep ? Math.round(xData.length / this.props.horizontalGridStep) : 1;
 		if (stepsBetweenVerticalLines < 1) stepsBetweenVerticalLines = 1;
 
@@ -42,10 +42,10 @@ export default class Grid extends Component {
 		}
 
 		const horizontalGridStyle = {
-			height: this.props.height / this.props.verticalGridStep,
+			height: this.props.gridLineWidth || 0.5,//this.props.height / this.props.verticalGridStep,
 			width: this.props.width,
-			borderTopColor: this.props.gridColor,
-			borderTopWidth: intendedLineWidth,
+			backgroundColor: this.props.gridColor,
+			//borderTopWidth: intendedLineWidth,
 		};
 
 		const verticalGridStyle = {
@@ -55,15 +55,15 @@ export default class Grid extends Component {
 			borderRightWidth: intendedLineWidth,
 		};
 
-		return (
+		return ( 
 			<View style={containerStyle}>
 				{(() => {
 					if (this.props.hideHorizontalGridLines) return null;
 					return (
-						<View style={{ position: 'absolute', flexDirection: 'column', justifyContent: 'space-around' }}>
+						<View style={{ position: 'absolute',  top: 0, bottom: 0, left: 0, right: 0,flexDirection: 'column', justifyContent: 'space-between' }}>
 							{horizontalRange.map((_, i) => <View key={i} style={horizontalGridStyle} />)}
 						</View>
-					);
+					); 
 				})()}
 				{(() => {
 					if (this.props.hideVerticalGridLines) return null;
