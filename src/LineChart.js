@@ -64,17 +64,25 @@ export default class LineChart extends Component<void, any, any> {
 
 	myText;
 
+	animatedX = new Animated.Value(-200);
+	animatedY = new Animated.Value(0);
+	updateMyText = false;
+
 	constructor(props: any) {
 		super(props);
 		const heightValue = (props.animated) ? heightZero : props.height;
 		const opacityValue = (props.animated) ? 0 : 1;
 		this.state = { height: new Animated.Value(heightValue), opacity: new Animated.Value(opacityValue) };
+		this.updateMyText = true;
 	}
 
-	componentWillUpdate() {
+	componentWillUpdate(nextProps) {
 		if (this.props.animated) {
 			Animated.timing(this.state.opacity, { duration: 0, toValue: 0 }).start();
 			Animated.timing(this.state.height, { duration: 0, toValue: heightZero }).start();
+		}
+		if (JSON.stringify(nextProps.data) != JSON.stringify(this.props.data)) {
+			this.updateMyText = true;
 		}
 	}
 
@@ -85,12 +93,14 @@ export default class LineChart extends Component<void, any, any> {
 		}
 	}
 
+
 	_drawLine = () => {
 		const containerHeight = this.props.height;
 		const containerWidth = this.props.width;
 		const data = this.props.data || [[]];
 		let minBound = this.props.minVerticalBound;
 		let maxBound = this.props.maxVerticalBound;
+		//console.info("Min BOUN = ", minBound, "     max bound = ", maxBound);
 
 		// For all same values, create a range anyway
 		if (minBound === maxBound) {
@@ -185,12 +195,13 @@ export default class LineChart extends Component<void, any, any> {
 			return Math.round(yPointText);
 		}
 
+		//console.info("dataPointSet = ", dataPointSet);
 		return (
 			<ViewOverflow style={{ overflow: 'visible' }} >
-				<View style={{ position: 'absolute' }}>
+				<View style={{ position: 'absolute' }}> 
 					<Surface width={containerWidth} height={containerHeight}>
 						{multipleLines}
-						{multipleFills}
+						{multipleFills} 
 					</Surface>
 				</View>
 				<View style={{ position: 'absolute' }}>
@@ -198,21 +209,21 @@ export default class LineChart extends Component<void, any, any> {
 				</View>
 				{(() => {
 					if (!this.props.showDataPoint) return null;
-					let point = dataPoints[0][Math.min(3, dataPoints[0].length)];
-					let animatedX = new Animated.Value(-200);
-					let animatedY = new Animated.Value(0);
+					let arrayPos = dataPoints[0].length == 2 ? 1 : (dataPoints[0].length == 3 || dataPoints[0].length == 4) ? 2 : 3;
+					let point = dataPoints[0][arrayPos];
 					let label = "";
 					if (point) {
-						label = getYForPoints(data[0][Math.min(2, data[0].length)], data[0][Math.min(2, data[0].length)], 0);
-						this.myText && this.myText.setText(label);
-						animatedX = new Animated.Value(point.x - 8);
-						animatedY = new Animated.Value(point.y - 8);
+						label = getYForPoints(data[0][arrayPos - 1], data[0][arrayPos - 1], 0);
+						this.updateMyText && this.myText && this.myText.setText(label);
+						this.updateMyText = false;
+						this.animatedX = new Animated.Value(point.x - 8);
+						this.animatedY = new Animated.Value(point.y - 8);
 					}
-					let interpolatedY = animatedY.interpolate({
+					let interpolatedY = this.animatedY.interpolate({
 						inputRange: [0, containerHeight],
 						outputRange: [0 - 30, containerHeight - 30],
 					});
-					let interpolatedX = animatedX.interpolate({
+					let interpolatedX = this.animatedX.interpolate({
 						inputRange: [0, containerWidth],
 						outputRange: [0 - 42, containerWidth - 42],
 					});
@@ -289,22 +300,22 @@ export default class LineChart extends Component<void, any, any> {
 									text = text !== undefined ? text : Math.round((maxBound * (1 - (yPoint / (containerHeight + 12)))) + 0).toString();
 									this.myText && this.myText.setText(text)
 									Animated.parallel([
-										Animated.timing(animatedX, {
+										Animated.timing(this.animatedX, {
 											duration: 0,
 											toValue: xPoint - 8,
 										}),
-										Animated.timing(animatedY, {
+										Animated.timing(this.animatedY, {
 											duration: 0,
 											toValue: yPoint - 8,
 										})
 									]).start();
 								} else {
 									Animated.parallel([
-										Animated.timing(animatedX, {
+										Animated.timing(this.animatedX, {
 											duration: 0,
 											toValue: -200,
 										}),
-										Animated.timing(animatedY, {
+										Animated.timing(this.animatedY, {
 											duration: 0,
 											toValue: -200,
 										})
@@ -332,7 +343,7 @@ export default class LineChart extends Component<void, any, any> {
 									</View>
 								</View>
 							</Animated.View>
-							<Animated.View style={{ width: 16, height: 16, borderRadius: 8, borderWidth: 3, borderColor: 'rgba(207, 180, 110, 1)', backgroundColor: '#fff', left: animatedX, top: animatedY }} />
+							<Animated.View style={{ width: 16, height: 16, borderRadius: 8, borderWidth: 3, borderColor: 'rgba(207, 180, 110, 1)', backgroundColor: '#fff', left: this.animatedX, top: this.animatedY }} />
 						</ViewOverflow>
 					);
 				})()}
