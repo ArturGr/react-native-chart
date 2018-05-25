@@ -95,21 +95,22 @@ export default class Chart extends Component<void, any, any> {
 				if (number > max) max = number;
 			});
 		});
+		if (max <= 3) {
+			max = 4;
+		}
+		if ((max % this.props.verticalGridStep) !== 0) {
+			max = Math.ceil(max / this.props.verticalGridStep) * this.props.verticalGridStep;
+		}
 
 		let ceilMax = Math.ceil(max);
 		let floorMin = Math.floor(min);
 
-		if ((ceilMax - floorMin) > this.props.verticalGridStep) {
-			min = floorMin;
-			max = ceilMax;
-		}
 
 		// Exit if we want tight bounds
 		if (this.props.tightBounds) {
 			return this.setState({ bounds: { min, max } });
 		}
-
-		max = getRoundNumber(max, this.props.verticalGridStep);
+		min = 0;
 		if (min < 0) {
 			let step;
 
@@ -146,12 +147,12 @@ export default class Chart extends Component<void, any, any> {
 			}
 		}
 		return this.setState({ bounds: { max, min } });
-	} 
+	}
 
 	_onContainerLayout = (e: Object) => this.setState({
 		containerHeight: e.nativeEvent.layout.height,
 		containerWidth: e.nativeEvent.layout.width,
-	});   
+	});
 
 	_minVerticalBound(): number {
 		if (this.props.tightBounds) return this.state.bounds.min;
