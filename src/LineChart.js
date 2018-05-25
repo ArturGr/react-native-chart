@@ -125,13 +125,13 @@ export default class LineChart extends Component<void, any, any> {
 					return;
 				}
 
-				let _height = (minBound * scale) + (containerHeight - (dataPoint * scale));
+				let _height = (Math.max(0, minBound) * scale) + (containerHeight - (dataPoint * scale));
 				if (_height < 0) _height = 0;
 
 				const x = horizontalStep * (i);
 				const y = Math.round(_height);
-
-				dataPointSet.push(makeDataPoint(x, y, this.props, index));
+				let seti = makeDataPoint(x, y, this.props, index);
+				dataPointSet.push(seti);
 
 				if ((beginNewPath) && (dataPoint !== '')) {
 					pathArray.push(new Path().moveTo(x, y));
@@ -143,6 +143,7 @@ export default class LineChart extends Component<void, any, any> {
 					fillPathArray[pathSubIndex].lineTo(x, y);
 				}
 			});
+
 
 			dataPoints.push(dataPointSet);
 
@@ -253,7 +254,7 @@ export default class LineChart extends Component<void, any, any> {
 									let xPoint;
 									let text;
 									if (dataPoints[0][next]) {
-										if (dataPoints[0].length < 2) {
+										if (dataPoints[0].length < 3) {
 											yPoint = dataPoints[0][dataPoints[0].length - 1].y
 											xPoint = dataPoints[0][dataPoints[0].length - 1].x
 											text = getYForPoints(data[0][dataPoints[0].length - 2], data[0][dataPoints[0].length - 2], 0);
@@ -268,16 +269,16 @@ export default class LineChart extends Component<void, any, any> {
 											let prevPoint = data[0][prPo];
 											let nePo = Math.min(data[0].length, Math.max(0, next - 1));
 											let nextPoint = data[0][nePo];
-											text = getYForPoints(prevPoint, nextPoint, xRest + 1); 
+											text = getYForPoints(prevPoint, nextPoint, xRest + 1);
 											let yDiff = dataPoints[0][previus].y - dataPoints[0][next].y
 											let xDiff = dataPoints[0][previus].x - dataPoints[0][next].x
 											yPoint = xRest == 0 ? dataPoints[0][next].y : (dataPoints[0][next].y - (yDiff * xRest))
 											xPoint = xRest == 0 ? dataPoints[0][next].x : (dataPoints[0][next].x - (xDiff * xRest))
 										}
 									} else {
-										if (previus < 0) {
-											yPoint = dataPoints[0][0].y
-											xPoint = dataPoints[0][0].x
+										if (previus - 1 <= 0) {
+											yPoint = dataPoints[0][1].y
+											xPoint = dataPoints[0][1].x
 											text = getYForPoints(data[0][0], data[0][0], 0);
 										} else {
 											yPoint = dataPoints[0][dataPoints[0].length - 1].y
@@ -285,7 +286,7 @@ export default class LineChart extends Component<void, any, any> {
 											text = getYForPoints(data[0][dataPoints[0].length - 2], data[0][dataPoints[0].length - 2], 0);
 										}
 									}
-									text = text || Math.round((maxBound * (1 - (yPoint / (containerHeight + 12)))) + 0).toString();
+									text = text !== undefined ? text : Math.round((maxBound * (1 - (yPoint / (containerHeight + 12)))) + 0).toString();
 									this.myText && this.myText.setText(text)
 									Animated.parallel([
 										Animated.timing(animatedX, {
