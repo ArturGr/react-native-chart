@@ -30,11 +30,11 @@ export default class YAxis extends Component<void, any, any> {
 		yAxisShortLabel: PropTypes.bool
 	};
 
-	static defaultProps : any = {
+	static defaultProps: any = {
 		placement: 'left',
 	};
 
-	constructor(props : any) {
+	constructor(props: any) {
 		super(props);
 		this.state = { bounds: { min: 0, max: 0 } };
 	}
@@ -43,18 +43,18 @@ export default class YAxis extends Component<void, any, any> {
 	shortenLargeNumber(num, useDecimal) {
 		let digits = (useDecimal) ? 2 : 0;
 		var units = ['K', 'M', 'B', 't', 'P', 'E', 'Z', 'Y'],
-				decimal;
-		for (var i=units.length-1; i>=0; i--) {
-				decimal = Math.pow(1000, i+1);
+			decimal;
+		for (var i = units.length - 1; i >= 0; i--) {
+			decimal = Math.pow(1000, i + 1);
 
-				if(num <= -decimal || num >= decimal) {
-						return +(num / decimal).toFixed(digits) + units[i];
-				}
+			if (num <= -decimal || num >= decimal) {
+				return +(num / decimal).toFixed(digits) + units[i];
+			}
 		}
 		return num;
 	}
 
-	_createLabelForYAxis = (index : number) => {
+	_createLabelForYAxis = (index: number) => {
 		let minBound = this.props.minVerticalBound;
 		let maxBound = this.props.maxVerticalBound;
 
@@ -67,7 +67,7 @@ export default class YAxis extends Component<void, any, any> {
 		let label = minBound + (maxBound - minBound) / this.props.verticalGridStep * index;
 		label = parseFloat(label.toFixed(3));
 
-		if (!this.props.yAxisUseDecimal) {
+		if (!this.props.yAxisUseDecimal) { 
 			label = Math.round(label);
 		}
 
@@ -95,7 +95,7 @@ export default class YAxis extends Component<void, any, any> {
 	render() {
 		const range = [];
 		const data = uniqueValuesInDataSets(this.props.data || [[]], 1);
-		const steps = (data.length < this.props.verticalGridStep) ? data.length : this.props.verticalGridStep;
+		const steps = /*this.props.maxVerticalBound  < this.props.verticalGridStep ? this.props.maxVerticalBound :*/ this.props.verticalGridStep;
 		for (let i = steps; i >= 0; i--) range.push(i);
 		return (
 			<View
@@ -104,7 +104,8 @@ export default class YAxis extends Component<void, any, any> {
 					this.props.style || {},
 					this.props.placement === 'left' && { borderRightColor: this.props.axisColor, borderRightWidth: this.props.axisLineWidth },
 					this.props.placement === 'right' && { borderLeftColor: this.props.axisColor, borderLeftWidth: this.props.axisLineWidth },
-				]}
+					{ marginTop: - 8, marginBottom: - 8}
+				]} 
 			>
 				{range.map(this._createLabelForYAxis)}
 			</View>
